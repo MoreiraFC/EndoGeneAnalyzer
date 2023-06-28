@@ -39,13 +39,6 @@ calc.outlier = function (tabela, limiar){
   return(res)
 }
 
-#user_base <- tibble::tibble(
-#  user = c("npo", "fabiano", "alunoAndre"),
-#  password = sapply(c("GCnp0!", "sn00py", "endogeno"), sodium::password_store),
-#  permissions = c("admin", "standard", "standard"),
-#  name = c("User One", "User Two", "User Three")
-#)
-
 # Define UI for application that draws a histogram
 ui <- fluidPage(
 
@@ -78,23 +71,6 @@ ui <- fluidPage(
                     tags$img(src = "logo_ufpa.png", width = "70px", height = "70px", style='padding-left:10px')
            )
   ),
-
-#  headerPanel(windowTitle = "EndoGeneAnalyzer", 
-#              title = div(
-#                class = "pull-right", tags$img(height = 70, width = 70, src = "logonpo2.png", style='padding-top:10px'),
-#                tags$img(height = 70, width = 70, src = "logo_ufpa.png", style='padding-left:10px'))
-#              ),
-#    titlePanel(
-#      title = div(
-#      class = "pull-right", tags$img(height = 70, width = 70, src = "logonpo2.png", style='padding-top:10px'),
-#      tags$img(height = 70, width = 70, src = "logo_ufpa.png", style='padding-left:10px'),
-      
-      #class = "pull-right", shinyauthr::logoutUI(id = "logout")
- #   ), "Nome da Ferramenta"
-#  ),
-  
-  # login section
-#  shinyauthr::loginUI(id = "login", title = "", user_title = "Usuário", pass_title = "Senha"),
   
   tabsetPanel(#type = "pills",
     tabPanel(style='padding-top:25px', "Data Upload", 
@@ -207,21 +183,6 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
-  
-#  credentials <- shinyauthr::loginServer(
-#    id = "login",
-#    data = user_base,
-#    user_col = user,
-#    pwd_col = password,
-#    sodium_hashed = TRUE,
-#    log_out = reactive(logout_init())
-#  )
-  
-  # Logout to hide
-#  logout_init <- shinyauthr::logoutServer(
-#    id = "logout",
-#    active = reactive(credentials()$user_auth)
-#  )
   
   ### observables 
   observe({
