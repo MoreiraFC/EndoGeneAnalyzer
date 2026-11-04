@@ -1,0 +1,117 @@
+---
+title: "EndoGeneAnalyzer Report"
+output: html_document
+params:
+  n: NA
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, warning=F, message=F, echo=F}
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(dunn.test)
+
+#exp.tab = read.delim2("ReportData.txt", row.names = 1)
+#exp.tab$deltaCq = as.numeric(exp.tab$deltaCq)
+#exp.tab$twoDeltaCq = as.numeric(exp.tab$twoDeltaCq)
+
+exp.tab = params$n
+
+n.groups = length(unique(exp.tab$group))
+```
+
+### Expression Plots
+
+```{r, warning=F, message=F, echo=T}
+
+# Script in R to reproduce the plot.
+set.seed(1)
+ggplot(exp.tab, mapping = aes(x = group, y=-deltaCq)) +
+  geom_boxplot(aes(fill=group)) +
+  geom_jitter(aes(col=-deltaCq), width = 0.3, cex = 1)
+
+# Script in R to reproduce the plot.
+ggplot(exp.tab, mapping = aes(x = group, y=-deltaCq)) +
+  geom_boxplot(aes(fill=group))
+
+# Script in R to reproduce the plot.
+set.seed(1)
+ggplot(exp.tab, mapping = aes(x = group, y=-deltaCq)) +
+  geom_jitter(aes(col=group), width = 0.3, cex = 1.5)
+
+# Script in R to reproduce the plot.
+ggplot(exp.tab, mapping = aes(x = group, y=-deltaCq)) +
+  geom_violin (aes(fill=group))
+
+```
+
+
+### Fold-Change Analysis
+
+```{r, warning=F, message=F, echo=F}
+df = data.frame()
+ if (n.groups == 1) {
+      df = data.frame(message = "Less than 2 groups selected. No Fold-Change Analysis to perform.")
+    } else if (n.groups > 1) {
+      
+      grupos = unique(exp.tab$group)
+      cont = 0
+      for (i in 1:(length(grupos)-1)){
+        for (j in (i+1):length(grupos)){
+          meanA = mean(filter(exp.tab, group == grupos[i])$twoDeltaCq, na.rm = T)
+          meanB = mean(filter(exp.tab, group == grupos[j])$twoDeltaCq, na.rm = T)
+          cont=cont+1
+          df[cont,1:2] = c(meanA/meanB, meanB/meanA)
+          row.names(df)[cont] = paste(grupos[i], grupos[j], sep="-")
+        }
+      }
+      colnames(df) = c("FC", "1/FC")
+    }
+
+kable(df, digits = 2) %>% kable_styling()
+
+```
+
+### Normality test
+
+```{r, warning=F, message=F, echo=F}
+
+df = as.data.frame(exp.tab %>% group_by(group) %>% summarise(count=n()))
+      df$shapiro.p.value = 0
+      for (i in 1:nrow(df)){
+        a = filter(exp.tab, group == df$group[i])
+        df$shapiro.p.value[i] = shapiro.test(a$deltaCq)$p.value
+      }
+kable(df, digits = 4) %>% kable_styling()
+
+```
+
+### Differential Expression Analysis Results
+
+```{r, warning=F, message=F, echo=F}
+if (n.groups == 1) {
+      print("Less than 2 groups selected. No Differential Expression Analysis to perform.")
+    } else if (n.groups == 2) {
+      t.test(formula = deltaCq ~ group, data = exp.tab)
+    } else if (n.groups > 2) {
+      model = aov(formula = deltaCq ~ group, data = exp.tab)
+      print("ANOVA Results:")
+      print(summary(model))
+      print(TukeyHSD(model))
+    }
+if (n.groups == 1) {
+      print("Less than 2 groups selected. No Differential Expression Analysis to perform.")
+    } else if (n.groups == 2) {
+      wilcox.test (formula = deltaCq ~ group, data = exp.tab)
+    } else if (n.groups > 2) {
+      dunn.test(x = exp.tab$deltaCq, g = exp.tab$group, kw = T, method = "BH")
+    }
+```
+
+### Data Table
+
+```{r, warning=F, message=F, echo=F}
+kable(exp.tab, digits = 4) %>% kable_styling()
+```
